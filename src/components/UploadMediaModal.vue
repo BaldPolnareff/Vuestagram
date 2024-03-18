@@ -1,0 +1,248 @@
+<script setup lang="ts">
+import { ref, computed, inject } from 'vue';
+import { InboxOutlined } from '@ant-design/icons-vue';
+import type { UploadChangeParam } from 'ant-design-vue';
+import message from 'ant-design-vue/es/message';
+import MediaCarousel from './MediaCarousel.vue';
+import SimpleCarousel from './SimpleCarousel.vue';
+import type { UploadFile } from 'ant-design-vue/es/upload/interface';
+
+const open = inject('openUploadMediaModal')
+const uploadStage = ref<boolean>(true);
+
+const fileList = ref<UploadFile[]>([]);
+const handleChange = (info: UploadChangeParam) => {
+    const status = info.file.status;
+
+    if (status !== 'uploading') {
+        console.log(info.file, info.fileList);
+    }
+    if (status === 'done') {
+        message.success(`${info.file.name} file uploaded successfully.`);
+    } else if (status === 'error') {
+        message.error(`${info.file.name} file upload failed.`);
+    }
+};
+
+function handleDrop(e: DragEvent) {
+    console.log(e);
+}
+
+
+const caption = ref<string>('');
+
+const acceptedFileTypes: string[] = ['image/jpeg', 'image/png', 'image/gif'];
+
+const primaryButtonTitle = computed(() => {
+    return uploadStage.value ? 'Next' : 'Upload';
+});
+
+const defaultButtonTitle = computed(() => {
+    return uploadStage.value ? 'Cancel' : 'Back';
+});
+
+const uploadMedia = () => {
+    console.log(`Uploading media with caption: ${caption.value}`);
+}
+
+const goBack = () => {
+    uploadStage.value = true;
+}
+
+const goNext = () => {
+    uploadStage.value = false;
+}
+
+const showModal = () => {
+    open.value = true;
+}
+
+const closeModal = () => {
+    open.value = false;
+}
+
+
+</script>
+
+<template>
+    <div class="modal-backdrop" v-if="open" @openUploadModal="showModal">
+        <div class="modal-wrapper">
+            <div class="title-wrapper">
+                <h5 class="upload-media">Upload media</h5>
+            </div>
+            <div class="content-wrapper" @click="console.log(fileList[0])">
+                <div class="file-upload-wrapper" v-if="uploadStage">
+                    <a-upload-dragger
+                        class="file-upload"
+                        v-model:fileList="fileList"
+                        :accept="acceptedFileTypes"
+                        name="file"
+                        :multiple="true"
+                        maxCount="4"
+                        listType="picture-card"
+                        action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+                        @change="handleChange"
+                        @drop="handleDrop"
+                    >
+                        <p class="ant-upload-drag-icon">
+                            <inbox-outlined class="inbox"></inbox-outlined>
+                        </p>
+                        <p class="ant-upload-hint">Click or drag</p>
+                    </a-upload-dragger>
+                </div>
+                <div class="input-caption-wrapper" v-else>
+                    <div class="thumbnail-wrapper">
+                        <MediaCarousel :files="fileList" />
+                    </div>
+                    <div class="caption-wrapper">
+                        <a-textarea
+                            class="caption-area"
+                            v-model:value="caption"
+                            placeholder="Enter description..."
+                            :rows="5"
+                        />
+                    </div>
+                </div>
+            </div>
+            <div class="buttons-footer">
+                <a-button
+                    type="primary"
+                    :disabled="!fileList.length"
+                    @click="uploadStage ? goNext() : uploadMedia()"
+                >{{ primaryButtonTitle }}</a-button>
+                <a-button
+                    type="default"
+                    @click="uploadStage ? closeModal() : goBack()"
+                >{{ defaultButtonTitle }}</a-button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped>
+.modal-backdrop {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    backdrop-filter: blur(5px);
+}
+
+.modal-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    width: 500px;
+    height: 98%;
+    gap: 10px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #fff;
+}
+
+.title-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+    font-size: smaller;
+}
+
+.content-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.file-upload-wrapper {
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+}
+
+.buttons-footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.file-upload {
+    display: flex;
+    padding: 5px;
+    border-radius: 5px;
+    gap: 5px;
+    flex-direction: column;
+    padding: 10px;
+    margin: 5px;
+}
+
+.caption-area {
+    width: 400px;
+    height: 70px;
+    padding: 3px;
+    border-radius: 5px;
+    border: none;
+    /* Remove weird decoration at bottom right corner */
+    resize: none;
+    font-size: 0.5rem;
+}
+
+.caption-area:focus {
+    border: none;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 1px 5px;
+}
+
+.file-upload-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    position: absolute;
+}
+
+.thumbnail-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 50px;
+    align-items: center;
+    margin-bottom: 150px;
+}
+
+.input-caption-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.ant-upload-drag-icon {
+    font-size: 24px;
+    color: #1890ff;
+}
+
+.ant-upload-hint {
+    font-size: 12px !important;
+    padding: 10px !important;
+}
+
+.inbox {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    width: 400px;
+    padding: 10px !important;
+}
+</style>
