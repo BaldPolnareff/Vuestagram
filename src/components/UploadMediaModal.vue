@@ -94,6 +94,7 @@ const closeModal = () => {
                     <div class="thumbnail-wrapper">
                         <!-- <MediaCarousel :files="fileList" /> -->
                         <SimpleCarousel :files="fileList" />
+                        <div class="buffer"></div>
                     </div>
                     <div class="caption-wrapper">
                         <a-textarea
@@ -121,6 +122,10 @@ const closeModal = () => {
 </template>
 
 <style scoped>
+.buffer {
+    height: 50px;
+}
+
 .modal-backdrop {
     display: flex;
     justify-content: center;
@@ -192,6 +197,7 @@ const closeModal = () => {
 }
 
 .caption-area {
+    margin-top: 20px;
     width: 400px;
     height: 70px;
     padding: 3px;
@@ -203,8 +209,7 @@ const closeModal = () => {
 }
 
 .caption-area:focus {
-    border: none;
-    box-shadow: rgba(0, 0, 0, 0.35) 0px 1px 5px;
+    border: none !important;
 }
 
 .file-upload-wrapper {
@@ -230,20 +235,22 @@ const closeModal = () => {
 }
 
 .ant-upload-drag-icon {
-    font-size: 24px;
+    font-size: 14px;
     color: #1890ff;
+    height: 20px;
 }
 
 .ant-upload-hint {
-    font-size: 12px !important;
+    font-size: 10px !important;
     padding: 10px !important;
 }
 
 .inbox {
     display: flex !important;
-    justify-content: center;
-    align-items: center;
+    justify-content: center !important;
+    align-items: center !important;
     width: 400px;
+    height: 30px;
     padding: 10px !important;
 }
 </style>

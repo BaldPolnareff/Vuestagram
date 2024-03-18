@@ -33,9 +33,10 @@ function extractThumbnailUrl(file: UploadFile) {
 :deep(.slick-slide) {
     text-align: center;
     height: 200px;
-    line-height: 160px;
+    width: 200px;
     background: #364d79;
     overflow: hidden;
+    border-radius: 10px;
 }
 
 :deep(.slick-slide h3) {
@@ -43,23 +44,14 @@ function extractThumbnailUrl(file: UploadFile) {
 }
 
 .carousel {
-    max-width: 250px;
-    margin: 10px auto;
-    justify-content: center;
-    align-items: center;
+    max-width: 200px;
 }
 
 .carousel-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 200px;
 }
 
-.img-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 200px;
-    width: 250px;
-}
 </style>
