@@ -31,7 +31,7 @@ function handleDrop(e: DragEvent) {
 
 const caption = ref<string>('');
 
-const acceptedFileTypes: string[] = ['image/jpeg', 'image/png', 'image/gif'];
+const acceptedFileTypes: string = "'image/jpeg','image/png','image/gif'";
 
 const primaryButtonTitle = computed(() => {
     return uploadStage.value ? 'Next' : 'Upload';
@@ -78,7 +78,7 @@ const closeModal = () => {
                         :accept="acceptedFileTypes"
                         name="file"
                         :multiple="true"
-                        maxCount="4"
+                        maxCount=4
                         listType="picture-card"
                         action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
                         @change="handleChange"
