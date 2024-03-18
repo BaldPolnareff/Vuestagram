@@ -92,7 +92,8 @@ const closeModal = () => {
                 </div>
                 <div class="input-caption-wrapper" v-else>
                     <div class="thumbnail-wrapper">
-                        <MediaCarousel :files="fileList" />
+                        <!-- <MediaCarousel :files="fileList" /> -->
+                        <SimpleCarousel :files="fileList" />
                     </div>
                     <div class="caption-wrapper">
                         <a-textarea

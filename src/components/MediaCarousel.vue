@@ -17,15 +17,16 @@ function extractThumbnailUrl(file: UploadFile) {
 <template>
     <div class="container" @click="console.log(props.files[0].thumbUrl)">
         <a-carousel arrows dots-class="slick-dots slick-thumb">
-            <template #customPaging="props">
+            <template>
                 <a>
                     <img :src="extractThumbnailUrl(props.files[0])" />
                 </a>
             </template>
-            <div 
-                v-for="(item, index) in props.files" 
-                :key="index">
-                <img :src="extractThumbnailUrl(item)" />
+            <div>
+                <img
+                    v-for="item in props.files"
+                    :src="extractThumbnailUrl(item)" 
+                />
             </div>
         </a-carousel>
     </div>
