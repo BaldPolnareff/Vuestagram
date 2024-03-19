@@ -57,3 +57,8 @@ export function isCredentialsValid(credentials: Credentials): boolean {
             isValidEmail(credentials.email) && 
             isValidPassword(credentials.password);
 }
+
+export function generateUniqueId(as_string: boolean = true): number | string {
+    const id: number = Date.now() + Math.floor(Math.random() * 1000);
+    return as_string ? id.toString() : id;
+}

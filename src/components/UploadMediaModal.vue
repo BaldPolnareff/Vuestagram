@@ -6,11 +6,24 @@ import message from 'ant-design-vue/es/message';
 import MediaCarousel from './MediaCarousel.vue';
 import SimpleCarousel from './SimpleCarousel.vue';
 import type { UploadFile } from 'ant-design-vue/es/upload/interface';
+import { supabase } from '@/supabase';
+import { generateUniqueId } from '@/utils';
+import { useUsersStore } from '@/stores/UsersStore';
+import { storeToRefs } from 'pinia';
 
 const open = inject('openUploadMediaModal')
 const uploadStage = ref<boolean>(true);
+const loadingUpload = ref<boolean>(false);
 
 const fileList = ref<UploadFile[]>([]);
+
+const mediaFiles = ref<File[]>([]);
+
+const bucketUploadMessage = ref<string>('');
+
+const userStore = useUsersStore();
+const { user } = storeToRefs(userStore);
+
 const handleChange = (info: UploadChangeParam) => {
     const status = info.file.status;
 
@@ -41,8 +54,64 @@ const defaultButtonTitle = computed(() => {
     return uploadStage.value ? 'Cancel' : 'Back';
 });
 
-const uploadMedia = () => {
+const uploadMedia = async () => {
     console.log(`Uploading media with caption: ${caption.value}`);
+    if (fileList.value.length) {
+        for (let i = 0; i < fileList.value.length; i++) {
+            mediaFiles.value.push(fileList.value[i].originFileObj as File)
+        }
+    }
+    console.log(mediaFiles.value);
+    if (mediaFiles.value.length && user.value) {
+        const uniqueName = generateUniqueId();
+        const postPathName = user.value.username + '_' + generateUniqueId();
+        const imageUrls = <string[]>[];
+        loadingUpload.value = true;
+
+        for (let i = 0; i < mediaFiles.value.length; i++) {
+            const file = mediaFiles.value[i];
+            const response = await supabase.storage
+                .from('media')
+                .upload(`public/${postPathName}/${uniqueName}_${file.name}`, file);
+            if (response.error) {
+                console.log(response.error);
+            } else {
+                bucketUploadMessage.value = `Media ${file.name} uploaded successfully`;
+                console.log(bucketUploadMessage.value);
+
+                imageUrls.push(response.data.path);
+            }
+        }
+
+        if (imageUrls.length) {
+            const { data, error } = await supabase.from('posts').insert({
+                owner_id: user.value.id,
+                caption: caption.value,
+                urls: imageUrls
+            });
+
+            if (error) {
+                loadingUpload.value = false;
+                bucketUploadMessage.value = error.message;
+                console.log(error);
+            } else {
+                loadingUpload.value = false;
+                bucketUploadMessage.value = 'Post inserted successfully';
+                console.log('Post inserted successfully');
+            }
+        }
+    } else {
+        loadingUpload.value = false;
+        bucketUploadMessage.value = 'No media to upload';
+        console.log('No media to upload');
+    }
+
+    bucketUploadMessage.value = '';
+    fileList.value = [];
+    mediaFiles.value = [];
+    caption.value = '';
+    goBack();
+    closeModal();
 }
 
 const goBack = () => {
@@ -70,7 +139,7 @@ const closeModal = () => {
             <div class="title-wrapper">
                 <h5 class="upload-media">Upload media</h5>
             </div>
-            <div class="content-wrapper" @click="console.log(fileList[0])">
+            <div class="content-wrapper">
                 <div class="file-upload-wrapper" v-if="uploadStage">
                     <a-upload-dragger
                         class="file-upload"
@@ -78,9 +147,9 @@ const closeModal = () => {
                         :accept="acceptedFileTypes"
                         name="file"
                         :multiple="true"
+                        :action="'file uploaded'"
                         maxCount=4
                         listType="picture-card"
-                        action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
                         @change="handleChange"
                         @drop="handleDrop"
                     >
@@ -91,18 +160,23 @@ const closeModal = () => {
                     </a-upload-dragger>
                 </div>
                 <div class="input-caption-wrapper" v-else>
-                    <div class="thumbnail-wrapper">
-                        <!-- <MediaCarousel :files="fileList" /> -->
-                        <SimpleCarousel :files="fileList" />
-                        <div class="buffer"></div>
+                    <div v-if="!loadingUpload">
+                        <div class="thumbnail-wrapper">
+                            <!-- <MediaCarousel :files="fileList" /> -->
+                            <SimpleCarousel :files="fileList" />
+                            <div class="buffer"></div>
+                        </div>
+                        <div class="caption-wrapper">
+                            <a-textarea
+                                class="caption-area"
+                                v-model:value="caption"
+                                placeholder="Enter description..."
+                                :rows="5"
+                            />
+                        </div>
                     </div>
-                    <div class="caption-wrapper">
-                        <a-textarea
-                            class="caption-area"
-                            v-model:value="caption"
-                            placeholder="Enter description..."
-                            :rows="5"
-                        />
+                    <div class="spinner-wrapper" v-else>
+                        <a-spin/>
                     </div>
                 </div>
             </div>

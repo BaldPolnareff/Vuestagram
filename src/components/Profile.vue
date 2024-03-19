@@ -51,7 +51,8 @@ const tmpUserInfo = ref<UserInfo>({
                     :username="$route.params.username.toString()"
                     :userInfo="tmpUserInfo"
                 ></UserBar>
-                <ImageGallery 
+                <ImageGallery
+                    :key="$route.params.username.toString()"
                     :posts="[
                         {
                             id: 1,
