@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, provide } from 'vue';
-import type { UserInfo } from '@/utils';
+import type { UserInfo, UserPost } from '@/utils';
 import UploadMediaModal from './UploadMediaModal.vue';
 import { storeToRefs } from 'pinia';
 import { useUsersStore } from '@/stores/UsersStore';
@@ -13,7 +13,8 @@ const { username: profileUsername } = route.params;
 
 const props = defineProps<{
     username: string,
-    userInfo: UserInfo
+    userInfo: UserInfo, 
+    addNewPost: (post: UserPost) => void
 }>();
 
 const openUploadMediaModal = ref<boolean>(false);
@@ -24,7 +25,9 @@ provide('openUploadMediaModal', openUploadMediaModal);
 </script>
 
 <template>
-    <UploadMediaModal v-if="user && profileUsername === user.username"/>
+    <UploadMediaModal v-if="user && profileUsername === user.username"
+        :addNewPost="props.addNewPost"
+    />
     <div class="userbar-container">
         <div class="top-content">
             <a-typography-title :level="2">{{ props.username }}</a-typography-title>
