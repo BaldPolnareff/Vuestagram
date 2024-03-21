@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUpdate } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import Container from './Container.vue';
 import UserBar from './UserBar.vue';
 import ImageGallery from './ImageGallery.vue';
@@ -9,11 +9,12 @@ import { useUsersStore } from '@/stores/UsersStore';
 
 import type { UserInfo, UserPost, User } from '@/utils';
 import gsap from 'gsap/src';
+import { storeToRefs } from 'pinia';
 
 const route = useRoute();
 const store = useUsersStore();
 
-const loggedUser = store.user;
+const {user: loggedUser} = storeToRefs(store)
 
 const username = ref<string>(route.params.username as string);
 
@@ -21,6 +22,8 @@ const posts = ref<UserPost[]>([])
 
 const user = ref<User | null>(null);
 const loadingUser = ref<boolean>(false);
+
+const isFollowing = ref<boolean>(false);
 
 const beforeEnter = (el: Element) => {
     el.style.opacity = '0';
@@ -80,8 +83,27 @@ async function fetchData (username: string) {
     loadingUser.value = false;
 }
 
-onMounted(() => {
-    fetchData(username.value);
+async function fetchIsFollowing() {
+    if (loggedUser.value && loggedUser.value?.id !== user.value?.id) {
+        const response = await supabase 
+            .from('followers_following')
+            .select()
+            .eq('follower_id', loggedUser.value?.id)
+            .eq('following_id', user.value?.id)
+            .single();
+        if (response.data) {
+            isFollowing.value = true;
+        }
+    }
+}
+
+onMounted(async () => {
+    await fetchData(username.value);
+});
+
+watch(loggedUser, async () => {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await fetchIsFollowing();
 });
 
 
@@ -94,13 +116,14 @@ const tmpUserInfo = ref<UserInfo>({
 </script>
 
 <template>
-    <Container v-if="!loadingUser">
+    <Container v-if="!loadingUser"> 
         <transition-group appear name="fade" @beforeEnter="beforeEnter" @enter="enter" @leave="leave">
             <div class="profile-container" :key="$route.params.username.toString()">
                 <UserBar
                     :user="user"
                     :userInfo="tmpUserInfo"
                     :addNewPost="addPost"
+                    :isFollowing="isFollowing"
                 ></UserBar>
                 <ImageGallery
                     :posts="posts"

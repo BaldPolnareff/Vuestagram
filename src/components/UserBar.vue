@@ -15,7 +15,8 @@ const { username: profileUsername } = route.params;
 const props = defineProps<{
     user: User | null,
     userInfo: UserInfo, 
-    addNewPost: (post: UserPost) => void
+    addNewPost: (post: UserPost) => void, 
+    isFollowing: boolean
 }>();
 
 const openUploadMediaModal = ref<boolean>(false);
@@ -60,9 +61,17 @@ async function followUser() {
             </div>
             <div class="follow-button-container" v-else>
                 <a-button
+                    type="primary"
                     @click="followUser"
+                    v-if="!props.isFollowing"
                 >
                     Follow
+                </a-button>
+                <a-button
+                    type="default"
+                    v-else
+                >
+                    Unfollow
                 </a-button>
             </div>
         </div>
