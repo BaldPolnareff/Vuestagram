@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, ref, provide } from 'vue';
-import type { UserInfo } from '@/utils';
+import type { UserInfo, UserPost, User } from '@/utils';
 import UploadMediaModal from './UploadMediaModal.vue';
 import { storeToRefs } from 'pinia';
 import { useUsersStore } from '@/stores/UsersStore';
 import { useRoute } from 'vue-router';
 
 const userStore = useUsersStore();
-const { user, loadingUser } = storeToRefs(userStore);
+const { user: loggedUser, loadingUser } = storeToRefs(userStore);
 const route = useRoute();
 const { username: profileUsername } = route.params;
 
 const props = defineProps<{
-    username: string,
-    userInfo: UserInfo
+    user: User | null,
+    userInfo: UserInfo, 
+    addNewPost: (post: UserPost) => void
 }>();
 
 const openUploadMediaModal = ref<boolean>(false);
@@ -24,10 +25,12 @@ provide('openUploadMediaModal', openUploadMediaModal);
 </script>
 
 <template>
-    <UploadMediaModal v-if="user && profileUsername === user.username"/>
-    <div class="userbar-container">
+    <UploadMediaModal v-if="props.user && profileUsername === props.user.username"
+        :addNewPost="props.addNewPost"
+    />
+    <div class="userbar-container" v-if="props.user">
         <div class="top-content">
-            <a-typography-title :level="2">{{ props.username }}</a-typography-title>
+            <a-typography-title :level="2">{{ props.user.username }}</a-typography-title>
         </div>
         <div class="bottom-content">
             <a-typography-title :level="5">{{ props.userInfo?.posts }} posts</a-typography-title>
@@ -36,7 +39,7 @@ provide('openUploadMediaModal', openUploadMediaModal);
         </div>
         <div 
             class="add-post-button-container"
-            v-if="user && profileUsername === user.username"
+            v-if="props.user && profileUsername === loggedUser?.username"
         >
             <a-button 
                 type="primary"
@@ -44,6 +47,9 @@ provide('openUploadMediaModal', openUploadMediaModal);
                 @click="openUploadMediaModal = true"
             >+</a-button>
         </div>
+    </div>
+    <div class="user-not-found-container" v-else>
+        <a-typography-title :level="2">User not found</a-typography-title>
     </div>
 </template>
 

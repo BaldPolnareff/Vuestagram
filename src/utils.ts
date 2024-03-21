@@ -1,11 +1,10 @@
 import gsap from "gsap";
 
 export type UserPost = {
-    id: number;
-    username: string;
-    imgUrl: string;
-    title: string | null;
-    caption: string | null;
+    id?: number;
+    urls: string[];
+    title?: string | null;
+    caption?: string | null;
 }
 
 export type UserInfo = {
@@ -21,6 +20,7 @@ export type Credentials = {
 };
 
 export type User = {
+    created_at: string;
     id: number;
     username: string;
     email: string;

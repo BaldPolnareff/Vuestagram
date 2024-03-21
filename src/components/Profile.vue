@@ -1,16 +1,26 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import Container from './Container.vue';
 import UserBar from './UserBar.vue';
 import ImageGallery from './ImageGallery.vue';
 import { useRoute } from 'vue-router';
+import { supabase } from '@/supabase';
+import { useUsersStore } from '@/stores/UsersStore';
 
-import type { UserInfo } from '@/utils';
+import type { UserInfo, UserPost, User } from '@/utils';
 import gsap from 'gsap/src';
 
 const route = useRoute();
+const store = useUsersStore();
+
+const loggedUser = store.user;
 
 const username = ref<string>(route.params.username as string);
+
+const posts = ref<UserPost[]>([])
+
+const user = ref<User | null>(null);
+const loadingUser = ref<boolean>(false);
 
 const beforeEnter = (el: Element) => {
     el.style.opacity = '0';
@@ -35,6 +45,45 @@ const leave = (el: Element) => {
     });
 }
 
+function addPost(post: UserPost): void {
+    posts.value.unshift(post);
+}
+
+async function fetchData (username: string) {
+    loadingUser.value = true;
+    const {data: userData} = await supabase 
+        .from('users')
+        .select()
+        .eq('username', username)
+        .single();
+
+    if (userData) {
+        user.value = userData;
+        console.log(user.value);
+
+        const {data: postsData} = await supabase 
+            .from('posts')
+            .select()
+            .eq('owner_id', user.value?.id)
+        console.log(user.value)
+        console.log(postsData);
+
+        if (postsData) {
+            posts.value = postsData;
+        }
+    }
+
+    else {
+        loadingUser.value = false;
+        return user.value = null;
+    }
+    loadingUser.value = false;
+}
+
+onMounted(() => {
+    fetchData(username.value);
+});
+
 const tmpUserInfo = ref<UserInfo>({
     posts: 0,
     followers: 69,
@@ -43,42 +92,26 @@ const tmpUserInfo = ref<UserInfo>({
 </script>
 
 <template>
-    <Container>
+    <Container v-if="!loadingUser">
         <transition-group appear name="fade" @beforeEnter="beforeEnter" @enter="enter" @leave="leave">
             <div class="profile-container">
                 <UserBar
                     :key="$route.params.username.toString()"
-                    :username="$route.params.username.toString()"
+                    :user="user"
                     :userInfo="tmpUserInfo"
+                    :addNewPost="addPost"
                 ></UserBar>
                 <ImageGallery
                     :key="$route.params.username.toString()"
-                    :posts="[
-                        {
-                            id: 1,
-                            imgUrl: 'https://picsum.photos/200/300',
-                            username: 'ilporcoddio', 
-                            title: 'Pisello nei jeans',
-                            caption: 'porcoddio sono fuori di testa ma dottor pallaoro'
-                        },
-                        {
-                            id: 2,
-                            imgUrl: 'https://picsum.photos/200/301',
-                            username: 'ilporcoddio',
-                            title: 'lara momento',
-                            caption: 'beh?'
-                        },
-                        {
-                            id: 3,
-                            imgUrl: 'https://picsum.photos/200/308',
-                            username: 'ilporcoddio',
-                            title: 'sono pelatp',
-                            caption: 'e allora?'
-                        }
-                    ]"
+                    :posts="posts"
                 />
             </div>
         </transition-group>
+    </Container>
+    <Container v-else class="spinner-container">
+        <div class="spinner-container">
+            <a-spin size="large" />
+        </div>
     </Container>
 </template>
 
@@ -92,5 +125,14 @@ const tmpUserInfo = ref<UserInfo>({
     padding: 20px;
     gap: 20px;
     flex-direction: column;
+}
+
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    padding: 80px;
 }
 </style>

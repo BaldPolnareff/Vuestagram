@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, inject } from 'vue';
+import { ref, computed, inject, defineProps } from 'vue';
 import { InboxOutlined } from '@ant-design/icons-vue';
 import type { UploadChangeParam } from 'ant-design-vue';
 import message from 'ant-design-vue/es/message';
@@ -8,6 +8,7 @@ import SimpleCarousel from './SimpleCarousel.vue';
 import type { UploadFile } from 'ant-design-vue/es/upload/interface';
 import { supabase } from '@/supabase';
 import { generateUniqueId } from '@/utils';
+import type { UserPost } from '@/utils';
 import { useUsersStore } from '@/stores/UsersStore';
 import { storeToRefs } from 'pinia';
 
@@ -23,6 +24,10 @@ const bucketUploadMessage = ref<string>('');
 
 const userStore = useUsersStore();
 const { user } = storeToRefs(userStore);
+
+const props = defineProps<{
+    addNewPost: (post: UserPost) => void
+}>();
 
 const handleChange = (info: UploadChangeParam) => {
     const status = info.file.status;
@@ -56,16 +61,17 @@ const defaultButtonTitle = computed(() => {
 
 const uploadMedia = async () => {
     console.log(`Uploading media with caption: ${caption.value}`);
+    const imageUrls: string[] = [];
     if (fileList.value.length) {
         for (let i = 0; i < fileList.value.length; i++) {
-            mediaFiles.value.push(fileList.value[i].originFileObj as File)
+            mediaFiles.value.unshift(fileList.value[i].originFileObj as File)
         }
     }
     console.log(mediaFiles.value);
     if (mediaFiles.value.length && user.value) {
         const uniqueName = generateUniqueId();
         const postPathName = user.value.username + '_' + generateUniqueId();
-        const imageUrls = <string[]>[];
+        
         loadingUpload.value = true;
 
         for (let i = 0; i < mediaFiles.value.length; i++) {
@@ -79,7 +85,7 @@ const uploadMedia = async () => {
                 bucketUploadMessage.value = `Media ${file.name} uploaded successfully`;
                 console.log(bucketUploadMessage.value);
 
-                imageUrls.push(response.data.path);
+                imageUrls.unshift(response.data.path);
             }
         }
 
@@ -106,12 +112,16 @@ const uploadMedia = async () => {
         console.log('No media to upload');
     }
 
+    goBack();
+    props.addNewPost({
+        caption: caption.value,
+        urls: imageUrls
+    })
+    closeModal();
     bucketUploadMessage.value = '';
     fileList.value = [];
     mediaFiles.value = [];
     caption.value = '';
-    goBack();
-    closeModal();
 }
 
 const goBack = () => {
