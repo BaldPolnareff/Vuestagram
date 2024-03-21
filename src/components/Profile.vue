@@ -94,15 +94,13 @@ const tmpUserInfo = ref<UserInfo>({
 <template>
     <Container v-if="!loadingUser">
         <transition-group appear name="fade" @beforeEnter="beforeEnter" @enter="enter" @leave="leave">
-            <div class="profile-container">
+            <div class="profile-container" :key="$route.params.username.toString()">
                 <UserBar
-                    :key="$route.params.username.toString()"
                     :user="user"
                     :userInfo="tmpUserInfo"
                     :addNewPost="addPost"
                 ></UserBar>
                 <ImageGallery
-                    :key="$route.params.username.toString()"
                     :posts="posts"
                 />
             </div>
