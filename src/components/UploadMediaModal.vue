@@ -64,7 +64,7 @@ const uploadMedia = async () => {
     const imageUrls: string[] = [];
     if (fileList.value.length) {
         for (let i = 0; i < fileList.value.length; i++) {
-            mediaFiles.value.push(fileList.value[i].originFileObj as File)
+            mediaFiles.value.unshift(fileList.value[i].originFileObj as File)
         }
     }
     console.log(mediaFiles.value);
@@ -85,7 +85,7 @@ const uploadMedia = async () => {
                 bucketUploadMessage.value = `Media ${file.name} uploaded successfully`;
                 console.log(bucketUploadMessage.value);
 
-                imageUrls.push(response.data.path);
+                imageUrls.unshift(response.data.path);
             }
         }
 

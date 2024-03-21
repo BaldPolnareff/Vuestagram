@@ -20,6 +20,7 @@ const username = ref<string>(route.params.username as string);
 const posts = ref<UserPost[]>([])
 
 const user = ref<User | null>(null);
+const loadingUser = ref<boolean>(false);
 
 const beforeEnter = (el: Element) => {
     el.style.opacity = '0';
@@ -49,6 +50,7 @@ function addPost(post: UserPost): void {
 }
 
 async function fetchData (username: string) {
+    loadingUser.value = true;
     const {data: userData} = await supabase 
         .from('users')
         .select()
@@ -72,9 +74,10 @@ async function fetchData (username: string) {
     }
 
     else {
-        user.value = null;
+        loadingUser.value = false;
+        return user.value = null;
     }
-
+    loadingUser.value = false;
 }
 
 onMounted(() => {
@@ -89,7 +92,7 @@ const tmpUserInfo = ref<UserInfo>({
 </script>
 
 <template>
-    <Container>
+    <Container v-if="!loadingUser">
         <transition-group appear name="fade" @beforeEnter="beforeEnter" @enter="enter" @leave="leave">
             <div class="profile-container">
                 <UserBar
@@ -105,6 +108,11 @@ const tmpUserInfo = ref<UserInfo>({
             </div>
         </transition-group>
     </Container>
+    <Container v-else class="spinner-container">
+        <div class="spinner-container">
+            <a-spin size="large" />
+        </div>
+    </Container>
 </template>
 
 <style scoped>
@@ -117,5 +125,14 @@ const tmpUserInfo = ref<UserInfo>({
     padding: 20px;
     gap: 20px;
     flex-direction: column;
+}
+
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    padding: 80px;
 }
 </style>
