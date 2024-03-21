@@ -39,7 +39,7 @@ provide('openUploadMediaModal', openUploadMediaModal);
         </div>
         <div 
             class="add-post-button-container"
-            v-if="props.user && profileUsername === props.user.username"
+            v-if="props.user && profileUsername === loggedUser?.username"
         >
             <a-button 
                 type="primary"
