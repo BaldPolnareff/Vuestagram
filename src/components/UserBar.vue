@@ -5,6 +5,7 @@ import UploadMediaModal from './UploadMediaModal.vue';
 import { storeToRefs } from 'pinia';
 import { useUsersStore } from '@/stores/UsersStore';
 import { useRoute } from 'vue-router';
+import { supabase } from '@/supabase';
 
 const userStore = useUsersStore();
 const { user: loggedUser, loadingUser } = storeToRefs(userStore);
@@ -21,6 +22,15 @@ const openUploadMediaModal = ref<boolean>(false);
 
 provide('openUploadMediaModal', openUploadMediaModal);
 
+
+async function followUser() {
+    await supabase 
+        .from('followers_following')
+        .insert({
+            follower_id: loggedUser.value?.id, 
+            following_id: props.user?.id
+        })
+} 
 
 </script>
 
@@ -49,7 +59,9 @@ provide('openUploadMediaModal', openUploadMediaModal);
                 >+</a-button>
             </div>
             <div class="follow-button-container" v-else>
-                <a-button>
+                <a-button
+                    @click="followUser"
+                >
                     Follow
                 </a-button>
             </div>
