@@ -24,6 +24,7 @@ const user = ref<User | null>(null);
 const loadingUser = ref<boolean>(false);
 
 const isFollowing = ref<boolean>(false);
+const loadingIsFollowing = ref<boolean>(false);
 
 const beforeEnter = (el: Element) => {
     el.style.opacity = '0';
@@ -84,6 +85,7 @@ async function fetchData (username: string) {
 }
 
 async function fetchIsFollowing() {
+    loadingIsFollowing.value = true;
     if (loggedUser.value && loggedUser.value?.id !== user.value?.id) {
         const response = await supabase 
             .from('followers_following')
@@ -95,6 +97,7 @@ async function fetchIsFollowing() {
             isFollowing.value = true;
         }
     }
+    loadingIsFollowing.value = false;
 }
 
 onMounted(async () => {
@@ -102,8 +105,10 @@ onMounted(async () => {
 });
 
 watch(loggedUser, async () => {
+    loadingIsFollowing.value = true;
     await new Promise(resolve => setTimeout(resolve, 1000));
     await fetchIsFollowing();
+    loadingIsFollowing.value = false;
 });
 
 
@@ -124,6 +129,7 @@ const tmpUserInfo = ref<UserInfo>({
                     :userInfo="tmpUserInfo"
                     :addNewPost="addPost"
                     :isFollowing="isFollowing"
+                    :loadingIsFollowing="loadingIsFollowing"
                 ></UserBar>
                 <ImageGallery
                     :posts="posts"

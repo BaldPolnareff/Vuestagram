@@ -16,7 +16,8 @@ const props = defineProps<{
     user: User | null,
     userInfo: UserInfo, 
     addNewPost: (post: UserPost) => void, 
-    isFollowing: boolean
+    isFollowing: boolean, 
+    loadingIsFollowing: boolean
 }>();
 
 const openUploadMediaModal = ref<boolean>(false);
@@ -48,7 +49,7 @@ async function followUser() {
             <a-typography-title :level="5">{{ props.userInfo?.followers }} followers</a-typography-title>
             <a-typography-title :level="5">{{ props.userInfo?.following }} following</a-typography-title>
         </div>
-        <div class="buttons-container" v-if="loggedUser">
+        <div class="buttons-container" v-if="loggedUser && !loadingIsFollowing">
             <div 
                 class="add-post-button-container"
                 v-if="profileUsername === loggedUser?.username"
@@ -74,6 +75,9 @@ async function followUser() {
                     Unfollow
                 </a-button>
             </div>
+        </div>
+        <div class="follow-button-container">
+            <a-spin v-if="loadingIsFollowing" />
         </div>
     </div>
     <div class="user-not-found-container" v-else>
@@ -132,4 +136,5 @@ async function followUser() {
     background-color: rgb(186, 223, 255);
     color: #444444;
 }
+
 </style>
