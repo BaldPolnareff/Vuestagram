@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUpdate } from 'vue';
 import Container from './Container.vue';
 import UserBar from './UserBar.vue';
 import ImageGallery from './ImageGallery.vue';
@@ -83,6 +83,8 @@ async function fetchData (username: string) {
 onMounted(() => {
     fetchData(username.value);
 });
+
+
 
 const tmpUserInfo = ref<UserInfo>({
     posts: 0,

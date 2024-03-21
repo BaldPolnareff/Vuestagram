@@ -47,6 +47,11 @@ provide('openUploadMediaModal', openUploadMediaModal);
                 @click="openUploadMediaModal = true"
             >+</a-button>
         </div>
+        <div class="follow-button-container" v-if="props.user && profileUsername !== loggedUser?.username">
+            <a-button>
+                Follow
+            </a-button>
+        </div>
     </div>
     <div class="user-not-found-container" v-else>
         <a-typography-title :level="2">User not found</a-typography-title>
@@ -80,6 +85,13 @@ provide('openUploadMediaModal', openUploadMediaModal);
 }
 
 .add-post-button-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.follow-button-container {
     display: flex;
     align-items: center;
     gap: 15px;
