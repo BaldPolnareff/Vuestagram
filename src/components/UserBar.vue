@@ -37,20 +37,22 @@ provide('openUploadMediaModal', openUploadMediaModal);
             <a-typography-title :level="5">{{ props.userInfo?.followers }} followers</a-typography-title>
             <a-typography-title :level="5">{{ props.userInfo?.following }} following</a-typography-title>
         </div>
-        <div 
-            class="add-post-button-container"
-            v-if="props.user && profileUsername === loggedUser?.username"
-        >
-            <a-button 
-                type="primary"
-                class="add-post-button"
-                @click="openUploadMediaModal = true"
-            >+</a-button>
-        </div>
-        <div class="follow-button-container" v-if="props.user && profileUsername !== loggedUser?.username">
-            <a-button>
-                Follow
-            </a-button>
+        <div class="buttons-container" v-if="loggedUser">
+            <div 
+                class="add-post-button-container"
+                v-if="profileUsername === loggedUser?.username"
+            >
+                <a-button 
+                    type="primary"
+                    class="add-post-button"
+                    @click="openUploadMediaModal = true"
+                >+</a-button>
+            </div>
+            <div class="follow-button-container" v-else>
+                <a-button>
+                    Follow
+                </a-button>
+            </div>
         </div>
     </div>
     <div class="user-not-found-container" v-else>
