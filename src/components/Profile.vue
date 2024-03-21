@@ -57,7 +57,7 @@ async function fetchData (username: string) {
 
     if (userData) {
         user.value = userData;
-        console.log(userData);
+        console.log(user.value);
 
         const {data: postsData} = await supabase 
             .from('posts')
@@ -69,6 +69,10 @@ async function fetchData (username: string) {
         if (postsData) {
             posts.value = postsData;
         }
+    }
+
+    else {
+        user.value = null;
     }
 
 }
@@ -90,7 +94,7 @@ const tmpUserInfo = ref<UserInfo>({
             <div class="profile-container">
                 <UserBar
                     :key="$route.params.username.toString()"
-                    :username="$route.params.username.toString()"
+                    :user="user"
                     :userInfo="tmpUserInfo"
                     :addNewPost="addPost"
                 ></UserBar>
