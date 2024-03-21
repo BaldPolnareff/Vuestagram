@@ -20,7 +20,7 @@ export type Credentials = {
 };
 
 export type User = {
-    created_at: string;
+    created_at?: string;
     id: number;
     username: string;
     email: string;
