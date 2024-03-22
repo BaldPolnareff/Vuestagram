@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import Container from './Container.vue';
 import UserBar from './UserBar.vue';
 import ImageGallery from './ImageGallery.vue';
@@ -102,15 +102,8 @@ async function fetchIsFollowing() {
 
 onMounted(async () => {
     await fetchData(username.value);
-});
-
-watch(loggedUser, async () => {
-    loadingIsFollowing.value = true;
-    await new Promise(resolve => setTimeout(resolve, 1000));
     await fetchIsFollowing();
-    loadingIsFollowing.value = false;
 });
-
 
 
 const tmpUserInfo = ref<UserInfo>({
