@@ -9,11 +9,12 @@ import { useUsersStore } from '@/stores/UsersStore';
 
 import type { UserInfo, UserPost, User } from '@/utils';
 import gsap from 'gsap/src';
+import { storeToRefs } from 'pinia';
 
 const route = useRoute();
 const store = useUsersStore();
 
-const loggedUser = store.user;
+const {user: loggedUser} = storeToRefs(store)
 
 const username = ref<string>(route.params.username as string);
 
@@ -22,28 +23,9 @@ const posts = ref<UserPost[]>([])
 const user = ref<User | null>(null);
 const loadingUser = ref<boolean>(false);
 
-const beforeEnter = (el: Element) => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(20px)';
-}
+const isFollowing = ref<boolean>(false);
+const loadingIsFollowing = ref<boolean>(false);
 
-const enter = (el: Element) => {
-    gsap.to(el, {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-        ease: 'power3.out'
-    });
-}
-
-const leave = (el: Element) => {
-    gsap.to(el, {
-        opacity: 0,
-        y: 20,
-        duration: 0.5,
-        ease: 'power3.out'
-    });
-}
 
 function addPost(post: UserPost): void {
     posts.value.unshift(post);
@@ -80,9 +62,31 @@ async function fetchData (username: string) {
     loadingUser.value = false;
 }
 
-onMounted(() => {
-    fetchData(username.value);
+async function fetchIsFollowing() {
+    loadingIsFollowing.value = true;
+    if (loggedUser.value && loggedUser.value?.id !== user.value?.id) {
+        const response = await supabase 
+            .from('followers_following')
+            .select()
+            .eq('follower_id', loggedUser.value?.id)
+            .eq('following_id', user.value?.id)
+            .single();
+        if (response.data) {
+            isFollowing.value = true;
+        }
+    }
+    loadingIsFollowing.value = false;
+}
+
+function updateIsFollowing(following: boolean) {
+    isFollowing.value = following;
+}
+
+onMounted(async () => {
+    await fetchData(username.value);
+    await fetchIsFollowing();
 });
+
 
 const tmpUserInfo = ref<UserInfo>({
     posts: 0,
@@ -92,21 +96,20 @@ const tmpUserInfo = ref<UserInfo>({
 </script>
 
 <template>
-    <Container v-if="!loadingUser">
-        <transition-group appear name="fade" @beforeEnter="beforeEnter" @enter="enter" @leave="leave">
-            <div class="profile-container">
-                <UserBar
-                    :key="$route.params.username.toString()"
-                    :user="user"
-                    :userInfo="tmpUserInfo"
-                    :addNewPost="addPost"
-                ></UserBar>
-                <ImageGallery
-                    :key="$route.params.username.toString()"
-                    :posts="posts"
-                />
+    <Container v-if="!loadingUser"> 
+            <div class="profile-container" :key="$route.params.username.toString()">
+                    <UserBar
+                        :user="user"
+                        :userInfo="tmpUserInfo"
+                        :addNewPost="addPost"
+                        :isFollowing="isFollowing"
+                        :loadingIsFollowing="loadingIsFollowing"
+                        :updateIsFollowing="updateIsFollowing"
+                    ></UserBar>
+                    <ImageGallery
+                        :posts="posts"
+                    />
             </div>
-        </transition-group>
     </Container>
     <Container v-else class="spinner-container">
         <div class="spinner-container">

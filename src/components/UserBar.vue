@@ -5,21 +5,46 @@ import UploadMediaModal from './UploadMediaModal.vue';
 import { storeToRefs } from 'pinia';
 import { useUsersStore } from '@/stores/UsersStore';
 import { useRoute } from 'vue-router';
+import { supabase } from '@/supabase';
 
 const userStore = useUsersStore();
 const { user: loggedUser, loadingUser } = storeToRefs(userStore);
 const route = useRoute();
 const { username: profileUsername } = route.params;
+const hover = ref<boolean>(false);
 
 const props = defineProps<{
     user: User | null,
     userInfo: UserInfo, 
-    addNewPost: (post: UserPost) => void
+    addNewPost: (post: UserPost) => void, 
+    updateIsFollowing: (following: boolean) => void,
+    isFollowing: boolean, 
+    loadingIsFollowing: boolean
 }>();
 
 const openUploadMediaModal = ref<boolean>(false);
 
 provide('openUploadMediaModal', openUploadMediaModal);
+
+
+async function followUser() {
+    props.updateIsFollowing(true);
+    await supabase 
+        .from('followers_following')
+        .insert({
+            follower_id: loggedUser.value?.id, 
+            following_id: props.user?.id
+        })
+} 
+
+async function unfollowUser() {
+    props.updateIsFollowing(false);
+    await supabase 
+        .from('followers_following')
+        .delete()
+        .eq('follower_id', loggedUser.value?.id)
+        .eq('following_id', props.user?.id)
+}
 
 
 </script>
@@ -37,15 +62,40 @@ provide('openUploadMediaModal', openUploadMediaModal);
             <a-typography-title :level="5">{{ props.userInfo?.followers }} followers</a-typography-title>
             <a-typography-title :level="5">{{ props.userInfo?.following }} following</a-typography-title>
         </div>
-        <div 
-            class="add-post-button-container"
-            v-if="props.user && profileUsername === loggedUser?.username"
-        >
-            <a-button 
-                type="primary"
-                class="add-post-button"
-                @click="openUploadMediaModal = true"
-            >+</a-button>
+        <div class="buttons-container" v-if="loggedUser && !loadingIsFollowing">
+            <div 
+                class="add-post-button-container"
+                v-if="profileUsername === loggedUser?.username"
+            >
+                <a-button 
+                    type="primary"
+                    class="add-post-button"
+                    @click="openUploadMediaModal = true"
+                >+</a-button>
+            </div>
+            <div class="follow-button-container" v-else>
+                <a-button
+                    type="primary"
+                    @click="followUser"
+                    v-if="!props.isFollowing"
+                >
+                    Follow
+                </a-button>
+                <a-button
+                    class="unfollow-button"
+                    type="default"
+                    :danger="hover"
+                    @mouseover="hover = true"
+                    @mouseleave="hover = false"
+                    @click="unfollowUser"
+                    v-else
+                >
+                    Unfollow
+                </a-button>
+            </div>
+        </div>
+        <div class="follow-button-container">
+            <a-spin v-if="loadingIsFollowing" />
         </div>
     </div>
     <div class="user-not-found-container" v-else>
@@ -86,6 +136,13 @@ provide('openUploadMediaModal', openUploadMediaModal);
     margin-top: 20px;
 }
 
+.follow-button-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
 .add-post-button {
     width: 50px;
     height: 50px;
@@ -97,4 +154,6 @@ provide('openUploadMediaModal', openUploadMediaModal);
     background-color: rgb(186, 223, 255);
     color: #444444;
 }
+
+
 </style>
