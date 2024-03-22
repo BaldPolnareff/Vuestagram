@@ -26,28 +26,6 @@ const loadingUser = ref<boolean>(false);
 const isFollowing = ref<boolean>(false);
 const loadingIsFollowing = ref<boolean>(false);
 
-const beforeEnter = (el: Element) => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(20px)';
-}
-
-const enter = (el: Element) => {
-    gsap.to(el, {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-        ease: 'power3.out'
-    });
-}
-
-const leave = (el: Element) => {
-    gsap.to(el, {
-        opacity: 0,
-        y: 20,
-        duration: 0.5,
-        ease: 'power3.out'
-    });
-}
 
 function addPost(post: UserPost): void {
     posts.value.unshift(post);
@@ -115,20 +93,18 @@ const tmpUserInfo = ref<UserInfo>({
 
 <template>
     <Container v-if="!loadingUser"> 
-        <transition-group appear name="fade" @beforeEnter="beforeEnter" @enter="enter" @leave="leave">
             <div class="profile-container" :key="$route.params.username.toString()">
-                <UserBar
-                    :user="user"
-                    :userInfo="tmpUserInfo"
-                    :addNewPost="addPost"
-                    :isFollowing="isFollowing"
-                    :loadingIsFollowing="loadingIsFollowing"
-                ></UserBar>
-                <ImageGallery
-                    :posts="posts"
-                />
+                    <UserBar
+                        :user="user"
+                        :userInfo="tmpUserInfo"
+                        :addNewPost="addPost"
+                        :isFollowing="isFollowing"
+                        :loadingIsFollowing="loadingIsFollowing"
+                    ></UserBar>
+                    <ImageGallery
+                        :posts="posts"
+                    />
             </div>
-        </transition-group>
     </Container>
     <Container v-else class="spinner-container">
         <div class="spinner-container">
