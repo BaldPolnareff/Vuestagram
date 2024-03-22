@@ -17,6 +17,7 @@ const props = defineProps<{
     user: User | null,
     userInfo: UserInfo, 
     addNewPost: (post: UserPost) => void, 
+    updateIsFollowing: (following: boolean) => void,
     isFollowing: boolean, 
     loadingIsFollowing: boolean
 }>();
@@ -27,6 +28,7 @@ provide('openUploadMediaModal', openUploadMediaModal);
 
 
 async function followUser() {
+    props.updateIsFollowing(true);
     await supabase 
         .from('followers_following')
         .insert({
@@ -34,6 +36,16 @@ async function followUser() {
             following_id: props.user?.id
         })
 } 
+
+async function unfollowUser() {
+    props.updateIsFollowing(false);
+    await supabase 
+        .from('followers_following')
+        .delete()
+        .eq('follower_id', loggedUser.value?.id)
+        .eq('following_id', props.user?.id)
+}
+
 
 </script>
 
@@ -75,6 +87,7 @@ async function followUser() {
                     :danger="hover"
                     @mouseover="hover = true"
                     @mouseleave="hover = false"
+                    @click="unfollowUser"
                     v-else
                 >
                     Unfollow

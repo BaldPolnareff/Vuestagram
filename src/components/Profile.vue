@@ -78,6 +78,10 @@ async function fetchIsFollowing() {
     loadingIsFollowing.value = false;
 }
 
+function updateIsFollowing(following: boolean) {
+    isFollowing.value = following;
+}
+
 onMounted(async () => {
     await fetchData(username.value);
     await fetchIsFollowing();
@@ -100,6 +104,7 @@ const tmpUserInfo = ref<UserInfo>({
                         :addNewPost="addPost"
                         :isFollowing="isFollowing"
                         :loadingIsFollowing="loadingIsFollowing"
+                        :updateIsFollowing="updateIsFollowing"
                     ></UserBar>
                     <ImageGallery
                         :posts="posts"
