@@ -11,6 +11,7 @@ const userStore = useUsersStore();
 const { user: loggedUser, loadingUser } = storeToRefs(userStore);
 const route = useRoute();
 const { username: profileUsername } = route.params;
+const hover = ref<boolean>(false);
 
 const props = defineProps<{
     user: User | null,
@@ -69,7 +70,11 @@ async function followUser() {
                     Follow
                 </a-button>
                 <a-button
+                    class="unfollow-button"
                     type="default"
+                    :danger="hover"
+                    @mouseover="hover = true"
+                    @mouseleave="hover = false"
                     v-else
                 >
                     Unfollow
@@ -136,5 +141,6 @@ async function followUser() {
     background-color: rgb(186, 223, 255);
     color: #444444;
 }
+
 
 </style>
