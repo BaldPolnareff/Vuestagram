@@ -3,6 +3,13 @@ import Container from './Container.vue';
 import Card from './Card.vue';
 import type { UserPost } from '../utils'
 import { ref } from 'vue';
+import { useUsersStore } from '@/stores/UsersStore';
+import { storeToRefs } from 'pinia';
+
+const store = useUsersStore();
+
+const { user: loggedUser, loadingUser: loadingTimeline } = storeToRefs(store);
+
 
 const postData = ref<UserPost[]>([
     {
@@ -31,12 +38,20 @@ const postData = ref<UserPost[]>([
 
 <template>
     <Container>
-        <div class="container">
-            <Card 
-                v-for="post in postData"
-                :key="post.id"
-                :post="post"
-            />
+        <div class="container" v-if="!loadingTimeline">
+            <div class="container" v-if="loggedUser">
+                <Card 
+                    v-for="post in postData"
+                    :key="post.id"
+                    :post="post"
+                />
+            </div>
+            <div class="container" v-else>
+                <p>Log in to see your timeline</p>
+            </div>
+        </div>
+        <div class="spinner-container" v-else>
+            <a-spin class="spinner"></a-spin>
         </div>
     </Container>
 </template>
@@ -49,5 +64,14 @@ const postData = ref<UserPost[]>([
     justify-content: center;
     padding: 20px;
     gap: 20px;
+}
+
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    padding: 80px;
 }
 </style>
