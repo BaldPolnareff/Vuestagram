@@ -5,6 +5,7 @@ export type UserPost = {
     urls: string[];
     title?: string | null;
     caption?: string | null;
+    owner_id?: number;
 }
 
 export type UserInfo = {

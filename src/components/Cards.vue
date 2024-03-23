@@ -1,37 +1,46 @@
 <script setup lang="ts">
 
 import Card from './Card.vue';
-import { ref } from 'vue';
-import type { UserPost } from '../utils';
+import { ref, onMounted } from 'vue';
+import type { UserPost, User, UserInfo } from '../utils';
+import { supabase } from '@/supabase';
+import { useUsersStore } from '@/stores/UsersStore';
+import { storeToRefs } from 'pinia';
 
-const postData = ref<UserPost[]>([
-    {
-        id: 1,
-        username: 'damiano',
-        imgUrl: 'https://img.ilgcdn.com/sites/default/files/styles/xl/public/foto/2024/02/26/1708951008-loredana-bert.jpg?_=1708951042',
-        title: 'Pisello nei jeans',
-        caption: 'porcoddio sono fuori di testa ma dottor pallaoro'
-    }, 
-    {
-        id: 2,
-        username: 'sabaku',
-        imgUrl: 'https://directus.luccacomicsandgames.com/lucca-comics-2023/assets/dyd6wv30wbso0w4k?key=directus-large-contain',
-        title: 'lara momento',
-        caption: 'beh?'
-    },
-    {
-        id: 3,
-        username: 'mario palladino',
-        imgUrl: 'https://cdn.openart.ai/stable_diffusion/09490bad4c8bc73523f549bfa3e215da44f38007_2000x2000.webp',
-        title: 'sono pelatp', 
-        caption: 'e allora?'
+const store = useUsersStore();
+
+const { user: loggedUser } = storeToRefs(store);
+
+const postData = ref<UserPost[]>([]);
+
+async function fetchData() {
+    const {data: followedUsersIds} = await supabase
+        .from('followers_following')
+        .select('following_id')
+        .eq('follower_id', loggedUser.value?.id)
+
+    if (followedUsersIds) {
+        const owner_ids: number[] = followedUsersIds.map((user: {following_id: number}) => user.following_id);
+
+        const {data: postsData} = await supabase
+                .from('posts')
+                .select()
+                .in('owner_id', owner_ids)
+
+        if (postsData) {
+            postData.value = postsData;
+        }
     }
-]);
+}
+
+onMounted(() => {
+    fetchData();
+})
 
 </script>
 
 <template>
-    <div class="container">
+    <div class="container" @click="console.log(postData)">
                 <Card 
                     v-for="post in postData"
                     :key="post.id"
