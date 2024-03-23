@@ -56,8 +56,7 @@ async function fetchData (username: string) {
             .from('posts')
             .select()
             .eq('owner_id', user.value?.id)
-        console.log(user.value)
-        console.log(postsData);
+            .order('created_at', {ascending: false});
 
         if (postsData) {
             posts.value = postsData;
