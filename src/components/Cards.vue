@@ -1,6 +1,6 @@
 <script setup lang="ts">
-
 import Card from './Card.vue';
+import Observer from './Observer.vue';
 import { ref, onMounted } from 'vue';
 import type { UserPost, User, UserInfo } from '../utils';
 import { supabase } from '@/supabase';
@@ -34,6 +34,10 @@ async function fetchData() {
     }
 }
 
+async function fetchNextBatch() {
+    console.log('fetching next batch');
+}
+
 onMounted(() => {
     fetchData();
 })
@@ -41,12 +45,13 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="container" @click="console.log(postData)">
-                <Card 
-                    v-for="post in postData"
-                    :key="post.id"
-                    :post="post"
-                />
+    <div class="container">
+        <Card 
+            v-for="post in postData"
+            :key="post.id"
+            :post="post"
+        />
+        <Observer v-if="postData.length" @intersect="fetchNextBatch"/>
     </div>
 </template>
 
