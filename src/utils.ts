@@ -6,6 +6,7 @@ export type UserPost = {
     title?: string | null;
     caption?: string | null;
     owner_id?: number;
+    created_at?: string;
 }
 
 export type UserInfo = {

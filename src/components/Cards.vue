@@ -26,6 +26,7 @@ async function fetchData() {
                 .from('posts')
                 .select()
                 .in('owner_id', owner_ids)
+                .order('created_at', {ascending: false})
 
         if (postsData) {
             postData.value = postsData;
