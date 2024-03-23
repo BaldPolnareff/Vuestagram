@@ -131,7 +131,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <Container v-if="!loadingUser" @click="fetchFollowersCount()"> 
+    <Container v-if="!loadingUser"> 
             <div class="profile-container" :key="$route.params.username.toString()">
                     <UserBar
                         :user="user"
