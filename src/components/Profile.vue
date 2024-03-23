@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
 import Container from './Container.vue';
 import UserBar from './UserBar.vue';
 import ImageGallery from './ImageGallery.vue';
@@ -27,6 +27,15 @@ const isFollowing = ref<boolean>(false);
 const loadingIsFollowing = ref<boolean>(false);
 
 
+const userInfo = reactive<UserInfo>({
+    posts: 0,
+    followers: 0,
+    following: 0
+});
+
+
+
+
 function addPost(post: UserPost): void {
     posts.value.unshift(post);
 }
@@ -52,6 +61,13 @@ async function fetchData (username: string) {
 
         if (postsData) {
             posts.value = postsData;
+
+            const followers = await fetchFollowersCount();
+            const following = await fetchFollowingCount();
+
+            userInfo.followers = followers;
+            userInfo.following = following;
+            userInfo.posts = postsData.length;
         }
     }
 
@@ -82,25 +98,44 @@ function updateIsFollowing(following: boolean) {
     isFollowing.value = following;
 }
 
+async function fetchFollowersCount(): Promise<number> {
+    const response = await supabase 
+        .from('followers_following')
+        .select('*', { count: 'exact' })
+        .eq('following_id', user.value?.id);
+
+    if (response.count) {
+        return response.count;
+    }
+    return 0;
+}
+
+async function fetchFollowingCount(): Promise<number> {
+    const response = await supabase 
+        .from('followers_following')
+        .select('*', { count: 'exact' })
+        .eq('follower_id', user.value?.id);
+
+    if (response.count) {
+        return response.count;
+    }
+    return 0;
+}
+
+
 onMounted(async () => {
     await fetchData(username.value);
     await fetchIsFollowing();
 });
 
-
-const tmpUserInfo = ref<UserInfo>({
-    posts: 0,
-    followers: 69,
-    following: 420
-});
 </script>
 
 <template>
-    <Container v-if="!loadingUser"> 
+    <Container v-if="!loadingUser" @click="fetchFollowersCount()"> 
             <div class="profile-container" :key="$route.params.username.toString()">
                     <UserBar
                         :user="user"
-                        :userInfo="tmpUserInfo"
+                        :userInfo="userInfo"
                         :addNewPost="addPost"
                         :isFollowing="isFollowing"
                         :loadingIsFollowing="loadingIsFollowing"
