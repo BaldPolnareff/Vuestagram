@@ -13,6 +13,11 @@ const { user: loggedUser } = storeToRefs(store);
 
 const postData = ref<UserPost[]>([]);
 
+const lastPostIndex = ref<number>(3);
+const postsBatchSize = 3;
+const ownerIds = ref<number[]>([]);
+const reachedEndOfPosts = ref<boolean>(false);
+
 async function fetchData() {
     const {data: followedUsersIds} = await supabase
         .from('followers_following')
@@ -21,11 +26,12 @@ async function fetchData() {
 
     if (followedUsersIds) {
         const owner_ids: number[] = followedUsersIds.map((user: {following_id: number}) => user.following_id);
-
+        ownerIds.value = owner_ids;
         const {data: postsData} = await supabase
                 .from('posts')
                 .select()
                 .in('owner_id', owner_ids)
+                .range(0, lastPostIndex.value)
                 .order('created_at', {ascending: false})
 
         if (postsData) {
@@ -35,7 +41,23 @@ async function fetchData() {
 }
 
 async function fetchNextBatch() {
-    console.log('fetching next batch');
+    if (!reachedEndOfPosts.value) {
+        const startIndex: number = lastPostIndex.value + 1;
+        const {data: postsData} = await supabase
+                .from('posts')
+                .select()
+                .in('owner_id', ownerIds.value)
+                .range(startIndex, startIndex + postsBatchSize - 1)
+
+            if (postsData) {
+                postData.value = [...postData.value, ...postsData];
+                lastPostIndex.value = startIndex + postsData.length - 1;
+            }
+
+            if (!postsData?.length) {
+                reachedEndOfPosts.value = true;
+            }
+    }
 }
 
 onMounted(() => {
@@ -51,7 +73,7 @@ onMounted(() => {
             :key="post.id"
             :post="post"
         />
-        <Observer v-if="postData.length" @intersect="fetchNextBatch"/>
+        <Observer v-if="postData.length && !reachedEndOfPosts" @intersect="fetchNextBatch"/>
     </div>
 </template>
 
