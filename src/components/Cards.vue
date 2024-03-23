@@ -31,7 +31,6 @@ async function fetchData() {
             postData.value = postsData;
         }
     }
-    
 }
 
 onMounted(() => {
@@ -41,7 +40,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="container">
+    <div class="container" @click="console.log(postData)">
                 <Card 
                     v-for="post in postData"
                     :key="post.id"
