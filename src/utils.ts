@@ -8,9 +8,12 @@ export type UserPost = {
 }
 
 export type UserInfo = {
-    posts: number;
+    posts?: number;
     followers: number;
     following: number;
+    bio?: string;
+    external_link?: string;
+    profile_image_url?: string;
 }
 
 export type Credentials = {
