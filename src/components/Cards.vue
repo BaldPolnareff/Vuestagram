@@ -43,20 +43,23 @@ async function fetchData() {
 async function fetchNextBatch() {
     if (!reachedEndOfPosts.value) {
         const startIndex: number = lastPostIndex.value + 1;
-        const {data: postsData} = await supabase
-                .from('posts')
-                .select()
-                .in('owner_id', ownerIds.value)
-                .range(startIndex, startIndex + postsBatchSize - 1)
+        const { data: postsData } = await supabase
+            .from('posts')
+            .select()
+            .in('owner_id', ownerIds.value)
+            .range(startIndex, startIndex + postsBatchSize - 1)
+            .order('created_at', { ascending: false }); // Add this line to order the posts by created_at in descending order
 
-            if (postsData) {
-                postData.value = [...postData.value, ...postsData];
-                lastPostIndex.value = startIndex + postsData.length - 1;
-            }
+        if (postsData) {
+            postData.value = [...postData.value, ...postsData];
+            lastPostIndex.value = startIndex + postsData.length - 1;
+        }
 
-            if (!postsData?.length) {
-                reachedEndOfPosts.value = true;
-            }
+        if (postsData?.length) {
+            lastPostIndex.value = startIndex + postsData.length - 1;
+        } else {
+            reachedEndOfPosts.value = true;
+        }
     }
 }
 
