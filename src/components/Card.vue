@@ -3,9 +3,11 @@ import { HeartOutlined, HeartFilled, CommentOutlined, EllipsisOutlined } from '@
 import { defineProps, ref, onMounted } from 'vue';
 import type { UserPost, User } from '@/utils';
 import { supabase } from '@/supabase';
+import CardWithCarousel from './CardWithCarousel.vue';
+
 
 const props = defineProps<{
-    post: UserPost
+    post: UserPost, 
 }>();
 
 const publicFileBucketBaseUrl: string = 'https://scspgajzrecjkjevzmcb.supabase.co/storage/v1/object/public/media/';
@@ -33,12 +35,13 @@ onMounted(() => {
 </script>
 
 <template>
-    <a-card hoverable style="width: 300px" class="card">
+    <a-card hoverable style="width: 300px" class="card" v-if="props.post.urls.length === 1">
         <template #cover>
             <img
                 alt="example"
                 :src="`${publicFileBucketBaseUrl}${props.post.urls[0]}`"
             />
+            
         </template>
         <template #actions>
             <HeartOutlined key="heart-outlined" />
@@ -51,6 +54,13 @@ onMounted(() => {
             </template>
         </a-card-meta>
     </a-card>
+    <CardWithCarousel 
+        v-else 
+        :imgUrls="props.post.urls"
+        :title="user?.username"
+        :description="props.post.caption ? props.post.caption : ''"
+        :avatarUrl="defaultAvatarUrl"
+    />
 </template>
 
 <style scoped>
