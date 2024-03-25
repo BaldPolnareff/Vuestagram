@@ -5,13 +5,13 @@ import type { UserPost, User } from '@/utils';
 import { supabase } from '@/supabase';
 import CardWithCarousel from './CardWithCarousel.vue';
 
-
+const envs = import.meta.env;
 const props = defineProps<{
     post: UserPost, 
 }>();
 
-const publicFileBucketBaseUrl: string = 'https://scspgajzrecjkjevzmcb.supabase.co/storage/v1/object/public/media/';
-const assetsFileBucketBaseUrl: string = 'https://scspgajzrecjkjevzmcb.supabase.co/storage/v1/object/sign/assets/';
+const publicFileBucketBaseUrl: string = envs.VITE_PUBLIC_FILE_BUCKET_BASE_URL;
+const assetsFileBucketBaseUrl: string = envs.VITE_ASSETS_FILE_BUCKET_BASE_URL;
 const defaultAvatarUrl: string = `${assetsFileBucketBaseUrl}/default_avatar.jpeg?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiJhc3NldHMvZGVmYXVsdF9hdmF0YXIuanBlZyIsImlhdCI6MTcxMTIxNjI0OCwiZXhwIjoyMDI2NTc2MjQ4fQ.aB_GUKn7RQ7IUVG41n-BYvGO5yq6S_DUn21ULhsfON4`;
 
 

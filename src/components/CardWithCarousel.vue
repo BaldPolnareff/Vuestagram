@@ -2,8 +2,9 @@
 import { ref, defineProps } from 'vue';
 import { LeftCircleOutlined, RightCircleOutlined, HeartOutlined, HeartFilled, CommentOutlined, EllipsisOutlined } from '@ant-design/icons-vue';
 
-const publicFileBucketBaseUrl: string = 'https://scspgajzrecjkjevzmcb.supabase.co/storage/v1/object/public/media/';
 
+const envs = import.meta.env;
+const publicFileBucketBaseUrl: string = envs.VITE_PUBLIC_FILE_BUCKET_BASE_URL;
 const props = defineProps<{
     imgUrls: string[],
     title?: string,

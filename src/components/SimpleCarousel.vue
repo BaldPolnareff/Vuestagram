@@ -2,8 +2,8 @@
 import { defineProps } from 'vue';
 import type { UploadFile } from 'ant-design-vue/lib/upload/interface';
 
-const publicFileBucketBaseUrl: string = 'https://scspgajzrecjkjevzmcb.supabase.co/storage/v1/object/public/media/';
-
+const envs = import.meta.env;
+const publicFileBucketBaseUrl: string = envs.VITE_PUBLIC_FILE_BUCKET_BASE_URL;
 const props = defineProps<{
     files?: UploadFile[];
     urls?: string[];
