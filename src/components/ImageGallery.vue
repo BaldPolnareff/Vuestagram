@@ -3,6 +3,7 @@ import { defineProps } from 'vue';
 import type { UserPost } from '@/utils';
 import gsap from 'gsap';
 
+const envs = import.meta.env;
 const props = defineProps<{
     posts: UserPost[]
 }>();
@@ -45,7 +46,7 @@ const leave = (el:Element) => {
             <img
                 v-for="(post, index) in props.posts"
                 :key="$route.params.username.toString() + index"
-                :src="`https://scspgajzrecjkjevzmcb.supabase.co/storage/v1/object/public/media/${post.urls[0]}`"
+                :src="`${envs.VITE_PUBLIC_FILE_BUCKET_BASE_URL}${post.urls[0]}`"
                 :data-index="index"
             ></img>
         </div>
